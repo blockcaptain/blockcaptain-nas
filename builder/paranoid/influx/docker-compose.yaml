@@ -1,0 +1,10 @@
+version: "2.0"
+services:
+  influx:
+    ports:
+      - "9999:9999"
+    image: quay.io/influxdb/influxdb:2.0.0-beta
+    user: "2001"
+    command: --reporting-disabled --bolt-path=/var/lib/influx/boltdb --engine-path=/var/lib/influx
+    volumes:
+      - /var/local/influx:/var/lib/influx
