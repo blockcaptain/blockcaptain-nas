@@ -85,13 +85,15 @@ autoinstall:
     package_update: true
     packages:
       - openssh-server
-      - etckeeper
       - docker-ce
       - docker-ce-cli
       - docker-compose
       - containerd.io
+      - samba
+      - nfs-kernel-server
       - telegraf
-      - git
       - smartmontools
+      - git
+      - etckeeper
     runcmd:
       - [ "/usr/share/paranoidnas/influx/init_influx.sh" ]
