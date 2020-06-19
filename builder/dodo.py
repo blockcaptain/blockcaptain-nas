@@ -174,6 +174,6 @@ def task_run_test_vm():
                -drive file=test_vm/disk2.img,format=raw,cache=none,if=virtio \
                -drive file=test_vm/disk3.img,format=raw,cache=none,if=virtio \
                -global isa-fdc.driveA= \
-               -net user,hostfwd=tcp::8022-:22 -net nic''')
+               -net user,hostfwd=tcp::9022-:22,hostfwd=tcp::9999-:9999 -net nic''')
         ]
     }
