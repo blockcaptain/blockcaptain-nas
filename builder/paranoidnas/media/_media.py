@@ -14,6 +14,7 @@ import tarfile
 import io
 import contextlib
 import tempfile
+import stat
 
 
 class BootMode(enum.Enum):
@@ -108,7 +109,8 @@ def _unpack_tar_to_iso(tar_file: tarfile.TarFile, iso_file: IsoFile) -> None:
             iso_file.create_directory(path)
         else:
             fp = tar_file.extractfile(info)
-            iso_file.write_fp(path, fp, length=info.size)
+            file_mode = 0o0100555 if info.mode & stat.S_IXUSR else None
+            iso_file.write_fp(path, fp, length=info.size, file_mode=file_mode)
 
 
 
