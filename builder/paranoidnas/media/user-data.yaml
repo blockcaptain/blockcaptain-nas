@@ -5,9 +5,15 @@ autoinstall:
   keyboard:
     layout: us
   identity:
-    hostname: btrbox
-    password: "$6$exDY1mhS4KUYCE/2$zmn9ToZwTKLhCw.b4/b.ZRTIZM30JZ4QrOQ2aOXJ8yk96xpcCof0kxKwuX1kqLG/ygbJ1f8wxED22bTL4F46P0"
-    username: ubuntu
+    hostname: sample
+    # password is 12345678
+    password: "$6$eydq9rDzEMW67$H6WI2V2HhMiHvzdWfZ9jPogftnAKXHFr4woccnVDOVLUOJr8PJ9eSMIL3Lm19v2MspdEY8/g.UdPXggu.rxL/."
+    username: sample
+  ssh:
+    install-server: true
+    authorized-keys:
+      - "sample"
+    allow-pw: false
   storage:
     swap:
       size: 0
@@ -71,8 +77,8 @@ autoinstall:
         path: /
         device: root_format
   late-commands:
-    - [ "/cdrom/paranoid/init_btrfs.sh" ]
-    - [ "/cdrom/paranoid/init_paranoid.sh" ]
+    - ["/cdrom/paranoid/init_btrfs.sh"]
+    - ["/cdrom/paranoid/init_paranoid.sh"]
   user-data:
     apt:
       sources:
@@ -84,16 +90,17 @@ autoinstall:
           keyid: 05CE15085FC09D18E99EFB22684A14CF2582E0C5
     package_update: true
     packages:
-      - openssh-server
       - docker-ce
       - docker-ce-cli
       - docker-compose
       - containerd.io
-      - samba
-      - nfs-kernel-server
       - telegraf
       - smartmontools
+      - python3-pip
+      - python3-venv
+      - python3-sh
       - git
       - etckeeper
     runcmd:
-      - [ "/usr/share/paranoidnas/influx/init_influx.sh" ]
+      - ["/usr/share/paranoidnas/init/init_os.sh"]
+      - ["/usr/share/paranoidnas/influx/init_influx.sh"]
