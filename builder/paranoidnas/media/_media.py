@@ -67,21 +67,23 @@ def create_paranoidnas_iso(working_dir: Path, boot_mode: BootMode, autoinstall_y
         supports_efi=(boot_mode == BootMode.EFI),
         supports_mbr=(boot_mode == BootMode.MBR),
     )
-    with _get_media_path(working_dir) as media_path_str:
-        media_path = Path(media_path_str)
-        builder.add_directory(media_path, Path("/paranoid"))
-        builder.build()
-        target_path = working_dir / "paranoidNAS.iso"
-        if target_path.exists():
-            target_path.unlink()
-        iso_file.write_iso(target_path)
+    
+    _copy_media_content_to_iso(iso_file)
+    builder.build()
+    target_path = working_dir / "paranoidNAS.iso"
+    if target_path.exists():
+        target_path.unlink()
+    iso_file.write_iso(target_path)
 
 
-def _get_media_path(working_dir: Path) -> Path:
+def _copy_media_content_to_iso(iso_file: IsoFile) -> None:
+    dest_path = Path("/paranoid")
+
     test_path = Path(__file__).parent / "media_content"
     if test_path.is_dir():
         logging.debug(f"Using local filesystem media_content at '{test_path}'.")
-        return contextlib.nullcontext(enter_result=str(test_path))
+        iso_file.copy_directory(test_path, dest_path)
+        return
 
     try:
         tar_data = pkgutil.get_data(__name__, "media_content.tar")
@@ -91,10 +93,22 @@ def _get_media_path(working_dir: Path) -> Path:
     if tar_data is None:
         raise Exception("Broken packaging. Missing media_content directory or tar file.")
 
-    temp_dir = tempfile.TemporaryDirectory(dir=working_dir)
-    temp_path = Path(temp_dir.name)
+    logging.debug("Using media_content.tar from abstract package resource.")
     tar_file = tarfile.open(fileobj=io.BytesIO(tar_data), mode="r")
-    tar_file.extractall(path=temp_path)
-    logging.debug(f"Using abstract tar package resource unpacked at '{temp_path}'.")
-    return temp_dir
+    _unpack_tar_to_iso(tar_file, iso_file)
+
+
+def _unpack_tar_to_iso(tar_file: tarfile.TarFile, iso_file: IsoFile) -> None:
+    target_path = Path("/paranoid")
+    iso_file.create_directory(target_path)
+    infos = (info for info in iter(tar_file.next, None) if info.path != '.')
+    for info in infos:
+        path = target_path / info.path
+        if info.isdir():
+            iso_file.create_directory(path)
+        else:
+            fp = tar_file.extractfile(info)
+            iso_file.write_fp(path, fp, length=info.size)
+
+
 

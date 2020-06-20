@@ -50,6 +50,18 @@ class IsoFile(contextlib.AbstractContextManager):
         with self.open_file_write(make_rr_path(path), file_mode=file_mode) as file:
             file.write(content.encode())
 
+    def write_fp(self, path: Path, fp: io.IOBase, length: int, file_mode: int = None) -> None:
+        rr_path = make_rr_path(path)
+        iso_path, rr_name = self._iso_rr._rr_path_to_iso_path_and_rr_name(rr_path, is_dir=False)
+        self._iso.add_fp(
+            fp=fp,
+            length=length,
+            iso_path=iso_path,
+            rr_name=rr_name,
+            joliet_path=rr_path,
+            file_mode=file_mode,
+        ),
+
     def replace_text(self, path: Path, content: str) -> str:
         with self.replace_file_write(make_rr_path(path)) as file:
             file.write(content.encode())
@@ -60,9 +72,7 @@ class IsoFile(contextlib.AbstractContextManager):
     def open_file_write(self, path: Path, file_mode: int = None) -> io.RawIOBase:
         temp_file = tempfile.NamedTemporaryFile(dir=str(self._temp_path), delete=False)
         rr_path = make_rr_path(path)
-        iso_path, rr_name = self._iso_rr._rr_path_to_iso_path_and_rr_name(
-            rr_path, is_dir=False
-        )
+        iso_path, rr_name = self._iso_rr._rr_path_to_iso_path_and_rr_name(rr_path, is_dir=False)
         return IsoFileWriter(
             temp_file=temp_file,
             add_file=lambda: self._iso.add_file(
@@ -89,11 +99,8 @@ class IsoFile(contextlib.AbstractContextManager):
 
     def create_directory(self, path: Path, file_mode: int = None) -> None:
         rr_path = make_rr_path(path)
-        iso_path, rr_name = self._iso_rr._rr_path_to_iso_path_and_rr_name(
-            rr_path, is_dir=True
-        )
+        iso_path, rr_name = self._iso_rr._rr_path_to_iso_path_and_rr_name(rr_path, is_dir=True)
         self._iso.add_directory(iso_path=iso_path, rr_name=rr_name, joliet_path=rr_path, file_mode=file_mode)
-        
 
     def copy_directory(self, source_path: Path, path: Path) -> None:
         self.create_directory(path)
