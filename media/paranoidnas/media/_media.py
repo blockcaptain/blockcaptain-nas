@@ -1,13 +1,14 @@
 from isomodder import (
     UbuntuServerIsoFetcher,
     IsoFile,
-    AutoInstallBuilder,
+    AutoInstallBuilder
 )
+from ._ui import get_rich
 from pathlib import Path
 import enum
 from ruamel import yaml
 import pkgutil
-from typing import Any
+from typing import Any, Collection
 from ruamel.yaml.comments import CommentedSeq, CommentedMap
 import logging
 import tarfile
@@ -39,7 +40,7 @@ def _convert_to_mbr_storage(data: Any) -> None:
 
 
 def create_paranoidnas_autoinstall_yaml(
-    boot_mode: BootMode, username: str, hostname: str, locale: str, kb_layout: str
+    boot_mode: BootMode, username: str, hostname: str, locale: str, kb_layout: str, authorized_keys: Collection[str]
 ) -> str:
     template_text = pkgutil.get_data(__name__, "user-data.yaml").decode()
     document = yaml.load(template_text, Loader=yaml.RoundTripLoader, preserve_quotes=True)
@@ -53,12 +54,20 @@ def create_paranoidnas_autoinstall_yaml(
     data['locale'] = locale
     data['keyboard']['layout'] = kb_layout
 
+    ssh_keys = data['ssh']['authorized-keys']
+    if len(authorized_keys) > 0:
+        ssh_keys.clear()
+        ssh_keys.extend(authorized_keys)
+    else:
+        del data['ssh']['authorized-keys']
+
     return yaml.dump(document, Dumper=yaml.RoundTripDumper, width=4096)
 
 
 def create_paranoidnas_iso(working_dir: Path, boot_mode: BootMode, autoinstall_yaml: str, autoinstall_prompt: bool) -> None:
     fetcher = UbuntuServerIsoFetcher(working_dir=working_dir, release="20.04")
-    iso_path = fetcher.fetch()
+    with get_rich() as progress:
+        iso_path = fetcher.fetch(progress)
     iso_file = IsoFile(iso_path)
     builder = AutoInstallBuilder(
         source_iso=iso_file,
@@ -74,7 +83,8 @@ def create_paranoidnas_iso(working_dir: Path, boot_mode: BootMode, autoinstall_y
     target_path = working_dir / "paranoidNAS.iso"
     if target_path.exists():
         target_path.unlink()
-    iso_file.write_iso(target_path)
+    with get_rich() as progress:
+        iso_file.write_iso(target_path, progress)
 
 
 def _copy_media_content_to_iso(iso_file: IsoFile) -> None:

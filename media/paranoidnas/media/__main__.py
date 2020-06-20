@@ -4,10 +4,11 @@ from rich.emoji import Emoji
 from rich.console import Console
 import logging
 from isomodder import IsoModderFatalException
-from paranoidnas import media
 from typing import Any
 import sys
 import click
+from ._media import create_paranoidnas_iso, create_paranoidnas_autoinstall_yaml, BootMode
+
 
 MIN_PYTHON = (3, 6)
 if sys.version_info < MIN_PYTHON:
@@ -48,10 +49,11 @@ def cli():
 def attach_autoinstall_options(function: Any) -> Any:
     click.option("-u", "--username", default="paranoid")(function)
     click.option("-h", "--hostname", default="paranoid")(function)
+    click.option("-a", "--authorized-key", "authorized_keys", multiple=True)(function)
     click.option("-l", "--locale", default="en_US.UTF-8")(function)
     click.option("-k", "--kb-layout", default="us")(function)
     click.option(
-        "-b", "--boot", "boot_mode", type=EnumChoice(media.BootMode, case_sensitive=False), default="EFI"
+        "-b", "--boot", "boot_mode", type=EnumChoice(BootMode, case_sensitive=False), default="EFI"
     )(function)
     return function
 
@@ -62,9 +64,9 @@ def attach_autoinstall_options(function: Any) -> Any:
 def build(**kwargs):
     working_dir = Path("build")
     autoinstall_config = dict(kwargs)
-    del autoinstall_config['prompt']
-    autoinstall_yaml = media.create_paranoidnas_autoinstall_yaml(**autoinstall_config)
-    media.create_paranoidnas_iso(
+    del autoinstall_config["prompt"]
+    autoinstall_yaml = create_paranoidnas_autoinstall_yaml(**autoinstall_config)
+    create_paranoidnas_iso(
         working_dir, kwargs["boot_mode"], autoinstall_yaml, autoinstall_prompt=kwargs["prompt"]
     )
     logging.info(f"You're ready to burn! {Emoji('fire')}")
@@ -75,7 +77,7 @@ def build(**kwargs):
 @cli.command()
 @attach_autoinstall_options
 def dumpautoinstall(**kwargs):
-    autoinstall_yaml = media.create_paranoidnas_autoinstall_yaml(**kwargs)
+    autoinstall_yaml = create_paranoidnas_autoinstall_yaml(**kwargs)
     print(autoinstall_yaml)
 
 

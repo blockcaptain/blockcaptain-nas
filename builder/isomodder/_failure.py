@@ -1,3 +1,0 @@
-
-class IsoModderFatalException(Exception):
-    pass
