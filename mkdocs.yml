@@ -1,0 +1,23 @@
+site_name: paranoidNAS
+repo_name: wpbrown/paranoidnas
+repo_url: https://github.com/wpbrown/paranoidnas
+theme:
+  name: material
+  palette:
+    scheme: default
+    primary: indigo
+    accent: indigo
+markdown_extensions:
+  - codehilite
+  - admonition
+  - footnotes
+  - pymdownx.snippets:
+      check_paths: true
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Design: design.md
+  - Monitoring: monitoring.md
+  - Cloud Backup: cloud-backup.md
+  - Recovery: recovery.md
+  - Contributing: contributing.md
