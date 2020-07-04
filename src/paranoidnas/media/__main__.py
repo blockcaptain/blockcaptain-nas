@@ -1,14 +1,16 @@
-from pathlib import Path
-from rich.logging import RichHandler
-from rich.emoji import Emoji
-from rich.console import Console
 import logging
-from isomodder import IsoModderFatalException
-from typing import Any
 import sys
-import click
-from ._media import create_paranoidnas_iso, create_paranoidnas_autoinstall_yaml, BootMode
+from pathlib import Path
+from typing import Any
 
+import click
+from rich.console import Console
+from rich.emoji import Emoji
+from rich.logging import RichHandler
+
+from isomodder import IsoModderFatalException
+
+from ._media import BootMode, create_paranoidnas_autoinstall_yaml, create_paranoidnas_iso
 
 MIN_PYTHON = (3, 6)
 if sys.version_info < MIN_PYTHON:
@@ -52,9 +54,9 @@ def attach_autoinstall_options(function: Any) -> Any:
     click.option("-a", "--authorized-key", "authorized_keys", multiple=True)(function)
     click.option("-l", "--locale", default="en_US.UTF-8")(function)
     click.option("-k", "--kb-layout", default="us")(function)
-    click.option(
-        "-b", "--boot", "boot_mode", type=EnumChoice(BootMode, case_sensitive=False), default="EFI"
-    )(function)
+    click.option("-b", "--boot", "boot_mode", type=EnumChoice(BootMode, case_sensitive=False), default="EFI")(
+        function
+    )
     return function
 
 
@@ -90,10 +92,10 @@ def main():
         console.print()
         console.print(f":cross_mark: [bold red] {exc} :cross_mark:")
         console.print()
-    except BaseException as exc:
+    except BaseException:
         console.print()
         console.print(
-            f":pile_of_poo: :whale: [bold red] Something totally unexpected has happened. Let's see..."
+            ":pile_of_poo: :whale: [bold red] Something totally unexpected has happened. Let's see..."
         )
         console.print()
         console.print_exception()

@@ -2,7 +2,7 @@
 set -ex
 DEST_DIR=build/pyz
 mkdir -p $DEST_DIR
-cp -r paranoidnas ../../isomodder/isomodder/src/isomodder $DEST_DIR
+cp -r paranoidnas ../../isomodder-git/src/isomodder $DEST_DIR
 tar -cv --exclude="__pycache__" --exclude=".vscode" -f $DEST_DIR/paranoidnas/media/media_content.tar -C $DEST_DIR/paranoidnas/media/media_content .
 rm -rf $DEST_DIR/paranoidnas/media/media_content
 python3 -m pip install -r requirements.txt --target $DEST_DIR

@@ -1,12 +1,12 @@
 from rich.progress import (
     BarColumn,
     DownloadColumn,
-    TextColumn,
-    TransferSpeedColumn,
-    TimeRemainingColumn,
     Progress,
-    TaskID,
+    TextColumn,
+    TimeRemainingColumn,
+    TransferSpeedColumn,
 )
+
 
 def get_rich() -> Progress:
     return Progress(
