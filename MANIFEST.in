@@ -1,0 +1,2 @@
+include src/paranoidnas/media/user-data.yaml
+recursive-include src/paranoidnas/media/media_content *
