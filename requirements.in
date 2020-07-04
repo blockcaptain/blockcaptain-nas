@@ -2,3 +2,4 @@ click
 click-pathlib
 rich
 ruamel.yaml
+git+https://github.com/wpbrown/isomodder.git#egg=isomodder
