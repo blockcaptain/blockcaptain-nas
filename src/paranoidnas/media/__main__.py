@@ -54,15 +54,18 @@ def attach_autoinstall_options(function: Any) -> Any:
     click.option("-a", "--authorized-key", "authorized_keys", multiple=True)(function)
     click.option("-l", "--locale", default="en_US.UTF-8")(function)
     click.option("-k", "--kb-layout", default="us")(function)
+    click.option("-z", "--timezone", show_default="Autodetect")(function)
     click.option("-b", "--boot", "boot_mode", type=EnumChoice(BootMode, case_sensitive=False), default="EFI")(
         function
     )
+    click.option("--interactive-storage", is_flag=True)(function)
+    click.option("--interactive-network", is_flag=True)(function)
     return function
 
 
 @cli.command()
 @attach_autoinstall_options
-@click.option("--prompt/--no-prompt", default=False)
+@click.option("--prompt/--no-prompt", default=True)
 def build(**kwargs):
     working_dir = Path("build")
     autoinstall_config = dict(kwargs)
@@ -71,6 +74,12 @@ def build(**kwargs):
     create_paranoidnas_iso(
         working_dir, kwargs["boot_mode"], autoinstall_yaml, autoinstall_prompt=kwargs["prompt"]
     )
+
+    if not (kwargs["prompt"] or kwargs["interactive_storage"] or kwargs["interactive_network"]):
+        logging.warning(
+            "This ISO has no prompt or interactive steps. It will overwrite the selected OS disk without any "
+            "intervention."
+        )
     logging.info(f"You're ready to burn! {Emoji('fire')}")
 
     # print out info here

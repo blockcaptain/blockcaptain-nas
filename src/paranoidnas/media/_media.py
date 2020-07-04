@@ -2,8 +2,9 @@ import enum
 import io
 import logging
 import pkgutil
+import re
 from pathlib import Path
-from typing import Any, BinaryIO, Collection, ContextManager, cast
+from typing import Any, BinaryIO, Collection, ContextManager, Optional, cast
 
 from ruamel import yaml
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
@@ -34,19 +35,33 @@ def _convert_to_mbr_storage(data: Any) -> None:
         config.remove(c)
 
 
+def detect_timezone() -> Optional[str]:
+    local_time_link = Path("/etc/localtime")
+    if not local_time_link.is_symlink():
+        return None
+    match = re.search(r"/zoneinfo/(.+)$", str(local_time_link.resolve()))
+    if match:
+        return match.group(1)
+    return None
+
+
 def create_paranoidnas_autoinstall_yaml(
     boot_mode: BootMode,
     username: str,
     hostname: str,
     locale: str,
     kb_layout: str,
+    timezone: str,
     authorized_keys: Collection[str],
+    interactive_storage: bool,
+    interactive_network: bool,
 ) -> str:
     template_data = pkgutil.get_data(__name__, "user-data.yaml")
     assert template_data is not None
     template_text = template_data.decode()
     document = yaml.load(template_text, Loader=yaml.RoundTripLoader, preserve_quotes=True)
     data: CommentedMap = document["autoinstall"]
+    user_data: CommentedMap = data["user-data"]
 
     if boot_mode == BootMode.MBR:
         _convert_to_mbr_storage(data)
@@ -63,6 +78,34 @@ def create_paranoidnas_autoinstall_yaml(
     else:
         del data["ssh"]["authorized-keys"]
 
+    # Interactivity
+    interactive = list(
+        filter(None, ["network" if interactive_network else None, "storage" if interactive_storage else None])
+    )
+    if interactive:
+        data["interactive-sections"] = interactive
+        logging.info(
+            "This ISO is not fully automatic. It has interactive steps that will require console access."
+        )
+        if interactive_storage:
+            logging.warning(
+                "Interactive storage configuration is supported, but certain elements must be configured "
+                "or installation will fail. See the documentation for more details."
+            )
+
+    # Timezone
+    detected_timezone = False
+    if timezone is None:
+        timezone = detect_timezone()
+        detected_timezone = timezone is not None
+
+    if timezone:
+        logging.info(f"Using {'detected' if detected_timezone else 'provided'} timezone '{timezone}'.")
+        user_data["timezone"] = timezone
+    else:
+        logging.info("Leaving timezone unspecified")
+
+    # Produce new YAML
     yaml_str = yaml.dump(document, Dumper=yaml.RoundTripDumper, width=4096)
     assert yaml_str is not None
     return yaml_str

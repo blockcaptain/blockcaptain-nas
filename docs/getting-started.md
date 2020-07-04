@@ -16,6 +16,10 @@ Make ISO.
 
 Plug ISO in and boot.
 
+#### Manual Storage Configuration
+
+Todo: requirements elements... i.e. btrfs on /
+
 ## Post-Installation
 
 Setup filesystems.
