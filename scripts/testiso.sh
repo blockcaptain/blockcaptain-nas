@@ -1,7 +1,8 @@
 #!/bin/bash
 
-./pnasmedia.pyz \
+./build/pnasmedia.pyz build \
     -u testadm \
     -h testnas \
     -b efi \
-    -s "$(cat ${HOME}/.ssh/id_rsa.pub)"
+    --no-prompt \
+    -a "$(cat ${HOME}/.ssh/id_rsa.pub)"
