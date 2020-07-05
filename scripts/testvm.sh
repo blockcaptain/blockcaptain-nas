@@ -24,4 +24,5 @@ kvm -no-reboot -m 2048 -smp 2 --bios /usr/share/qemu/OVMF.fd \
     -drive file=${vmStateDir}/diskc.img,format=raw,index=2,cache=none,if=virtio \
     -drive file=${vmStateDir}/diskd.img,format=raw,index=3,cache=none,if=virtio \
     ${mediaDrive} \
-    -global isa-fdc.driveA= 
+    -global isa-fdc.driveA= \
+    -net user,hostfwd=tcp::9022-:22,hostfwd=tcp::9999-:9999 -net nic
