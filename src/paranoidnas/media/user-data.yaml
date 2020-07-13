@@ -88,6 +88,9 @@ autoinstall:
         influx.list:
           source: "deb https://repos.influxdata.com/ubuntu $RELEASE stable"
           keyid: 05CE15085FC09D18E99EFB22684A14CF2582E0C5
+        paranoidnas.list:
+          source: "deb https://packages.rebeagle.com/paranoidnas/ubuntu $RELEASE-edge main"
+          keyid: F2BD7AFC1458A49AC006AB2EF27727E02FA62CB0
     package_update: true
     packages:
       - docker-ce
@@ -96,11 +99,10 @@ autoinstall:
       - containerd.io
       - telegraf
       - smartmontools
-      - python3-pip
-      - python3-venv
-      - python3-sh
+      - btrfs-pnbackup
       - git
       - etckeeper
-    runcmd:
-      - ["/usr/share/paranoidnas/init/init_os.sh"]
-      - ["/usr/share/paranoidnas/influx/init_influx.sh"]
+    users:
+      - default
+      - name: backupop
+        password: "$6$eydq9rDzEMW67$H6WI2V2HhMiHvzdWfZ9jPogftnAKXHFr4woccnVDOVLUOJr8PJ9eSMIL3Lm19v2MspdEY8/g.UdPXggu.rxL/."
