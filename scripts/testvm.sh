@@ -7,6 +7,7 @@ mkdir -p ${vmStateDir}
 if [[ $1 == '-i' ]]; then
     mediaDrive="-cdrom ${isoFile}"
     rm -f ${vmStateDir}/diska.img
+    ssh-keygen -f "${HOME}/.ssh/known_hosts" -R "[localhost]:9022"
 else
     mediaDrive=""
 fi

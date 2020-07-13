@@ -66,17 +66,18 @@ def create_paranoidnas_autoinstall_yaml(
     if boot_mode == BootMode.MBR:
         _convert_to_mbr_storage(data)
 
-    data["identity"]["username"] = username
-    data["identity"]["hostname"] = hostname
+    default_user = data["user-data"]["users"][0]
+    default_user["name"] = username
+    data["late-commands"][1].append(hostname)
     data["locale"] = locale
     data["keyboard"]["layout"] = kb_layout
 
-    ssh_keys = data["ssh"]["authorized-keys"]
+    ssh_keys = default_user["ssh_authorized_keys"]
     if len(authorized_keys) > 0:
         ssh_keys.clear()
         ssh_keys.extend(authorized_keys)
     else:
-        del data["ssh"]["authorized-keys"]
+        del default_user["ssh_authorized_keys"]
 
     # Interactivity
     interactive = list(

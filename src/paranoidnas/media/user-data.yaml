@@ -4,15 +4,8 @@ autoinstall:
   locale: en_US.UTF-8
   keyboard:
     layout: us
-  identity:
-    hostname: sample
-    # password is 12345678
-    password: "$6$eydq9rDzEMW67$H6WI2V2HhMiHvzdWfZ9jPogftnAKXHFr4woccnVDOVLUOJr8PJ9eSMIL3Lm19v2MspdEY8/g.UdPXggu.rxL/."
-    username: sample
   ssh:
     install-server: true
-    authorized-keys:
-      - "sample"
     allow-pw: false
   storage:
     swap:
@@ -80,6 +73,7 @@ autoinstall:
     - ["/cdrom/paranoid/init_btrfs.sh"]
     - ["/cdrom/paranoid/init_paranoid.sh"]
   user-data:
+    hostname: sample
     apt:
       sources:
         docker.list:
@@ -103,6 +97,15 @@ autoinstall:
       - git
       - etckeeper
     users:
-      - default
+      - name: sample
+        groups:
+          - adm
+          - lxd
+          - sudo
+        lock-passwd: false
+        passwd: "$5$jMMLG7Ea$pYU4oGGb6KvTfNBQmyTsKnzsp31VKMQcwLepGVRboEA"
+        shell: /bin/bash
+        ssh_authorized_keys:
+          - sample
       - name: backupop
-        password: "$6$eydq9rDzEMW67$H6WI2V2HhMiHvzdWfZ9jPogftnAKXHFr4woccnVDOVLUOJr8PJ9eSMIL3Lm19v2MspdEY8/g.UdPXggu.rxL/."
+        lock-passwd: true
